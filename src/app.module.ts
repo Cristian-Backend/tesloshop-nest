@@ -9,10 +9,10 @@ import { FilesModule } from './files/files.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
+import { MessageWsModule } from './message-ws/message-ws.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), // para viarables de entorno.
-    
+  imports: [ConfigModule.forRoot(), 
     TypeOrmModule.forRoot({
     type: 'postgres',
     host: process.env.DB_HOST,
@@ -26,15 +26,16 @@ import { AuthModule } from './auth/auth.module';
 
 
     }), 
-    ServeStaticModule.forRoot({ // 
-      rootPath: join(__dirname, '..', 'public'), // configura la carpeta estática
+    ServeStaticModule.forRoot({ 
+      rootPath: join(__dirname, '..', 'public'), 
     }),
 
     ProductsModule,
     CommonModule,
     SeedModule,
     FilesModule,
-    AuthModule,   
+    AuthModule,
+    MessageWsModule,   
   ]
   
 })

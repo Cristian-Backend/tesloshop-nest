@@ -5,12 +5,12 @@ export const fileFilter = (req: Express.Request, file: Express.Multer.File, call
 
     //console.log({file});
     
-    if(!file) return callback(new Error (` file is empty`), false); // si no hay archivo retorna un error
+    if(!file) return callback(new Error (` file is empty`), false); 
 
-    const fileExptension = file.mimetype.split('/')[1]; // obtiene la extension del archivo
-    const validExtension = ['jpg', 'jpeg', 'png', 'gif']; // extensiones validas
+    const fileExptension = file.mimetype.split('/')[1]; 
+    const validExtension = ['jpg', 'jpeg', 'png', 'gif']; 
 
-    if (validExtension.includes(fileExptension)) return callback(null, true); // si la extension es valida retorna true
+    if (validExtension.includes(fileExptension)) return callback(null, true); 
 
     callback(null, false);
 

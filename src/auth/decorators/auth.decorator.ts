@@ -6,11 +6,12 @@ import { UserRoleGuard } from '../guards/user-role/user-role.guard';
 
 export function Auth(...roles: validRoles[]) {
   
-    return applyDecorators( // MOVIMOS el roleprotected y userGuard, Authguard , userRoleGuard en esta funcion. simplifica el controllers
+    return applyDecorators( 
 
-    RoleProtected(...roles), // aplicamos la interface validRoles
+    RoleProtected(...roles), 
 
-    UseGuards(AuthGuard(), UserRoleGuard),
+    UseGuards(AuthGuard('jwt'), UserRoleGuard) 
+
    
   );
 }

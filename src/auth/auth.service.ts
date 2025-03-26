@@ -11,7 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class AuthService {
 
-  constructor( // inyectamos el repositorio de usuario (entidad)
+  constructor( 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService
@@ -22,14 +22,14 @@ export class AuthService {
     try {
 
       // encriptamos la contraseña
-      const {password, ...userData} = createUserDto; // el userdate seria el resto de la info.
+      const {password, ...userData} = createUserDto; 
 
       const user = this.userRepository.create({
         ...userData,
         password: await bcrypt.hashSync(password, 10)
       });
       await this.userRepository.save(user);
-      delete user.password; // eliminamos la contraseña del objeto que retornamos
+      delete user.password; 
 
       return {
         ...user,
@@ -51,11 +51,11 @@ async login(loginUserDto: LoginUserDto) {
   const { email, password } = loginUserDto;
 
   const user = await this.userRepository.findOne({
-    where: { email }, // buscamos el usuario por email
-    select: { email: true, password: true, id:true } // seleccionamos solo el email y la contraseña y id
+    where: { email }, 
+    select: { email: true, password: true, id:true } 
   });
 
-  if (!user) throw new UnauthorizedException('Invalid credentials (email)'); // para el login.
+  if (!user) throw new UnauthorizedException('Invalid credentials (email)'); 
 
   // comparamos la contraseña // si no hace match
   if (!bcrypt.compareSync(password, user.password)) {
@@ -69,6 +69,15 @@ async login(loginUserDto: LoginUserDto) {
   };
 }
 
+
+async checkAuthStatus(user:User){
+
+  return {
+    ...user,
+    token: this.getJwtToken({id: user.id})
+  };
+
+}
 
 
 private getJwtToken(payload: JwtPayload){

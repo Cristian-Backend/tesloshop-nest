@@ -8,17 +8,17 @@ import { User } from 'src/auth/entities/user.entity';
 export class UserRoleGuard implements CanActivate {
 
   constructor(
-    private readonly reflector: Reflector // Reflector es una clase que nos permite obtener los metadatos de una clase o método.
+    private readonly reflector: Reflector 
   ) {}
 
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
       
-    const validRoles = this.reflector.get<string[]>(META_ROLES, context.getHandler()); // Obtiene los "roles" válidos de la ruta en el controller private2
+    const validRoles = this.reflector.get<string[]>(META_ROLES, context.getHandler()); 
     
-    if(!validRoles) return true; // Si no hay roles válidos, se permite el acceso a la ruta
-    if(validRoles.length === 0) return true; // Si no hay roles válidos, se permite el acceso a la ruta
+    if(!validRoles) return true; 
+    if(validRoles.length === 0) return true; 
 
 
 
@@ -30,13 +30,13 @@ export class UserRoleGuard implements CanActivate {
       throw new BadRequestException('User not found ');
 
     
-    for (const role of user.roles ){ // Recorre los roles del usuario
-      if(validRoles.includes(role)){ // Si el rol del usuario está en los roles válidos, se permite el acceso a la ruta
+    for (const role of user.roles ){ 
+      if(validRoles.includes(role)){ 
         return true;
       }
     }
 
-    throw new ForbiddenException( // Si el usuario no tiene un rol válido, se lanza una excepción
+    throw new ForbiddenException( 
     `User ${user.fullName} need a valid role: [${validRoles}] `
     )
     

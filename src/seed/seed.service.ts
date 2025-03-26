@@ -1,30 +1,65 @@
 import { Injectable } from '@nestjs/common';
 import { ProductsService } from '../products/products.service';
 import { initialData } from './data/seed-data';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../auth/entities/user.entity';
+import { Repository } from 'typeorm';
 
 
 @Injectable()
 export class SeedService {
-    constructor(private ProductsService: ProductsService) {}
+    constructor(private ProductsService: ProductsService,
+        @InjectRepository(User)
+        private readonly userRepository: Repository<User>
+    ) {}
     async runSeed(){
+        await this.deleteTables()
 
-     await this.insertNewProduct()
+        const adminUser = await this.insertUsers()  
+
+        await this.insertNewProduct(adminUser)
         return 'SEED EXECUTED';
     }
 
 
-    private async insertNewProduct(){ 
-       // INSERTAR PRODUCTO A LA BASE DE DATOS
-      await  this.ProductsService.deleteAllProducts()
+    private async deleteTables(){
+        await this.ProductsService.deleteAllProducts() 
 
-      const products = initialData.products // initial data viene del seed data, la información de los productos, parecido al dto que creamos
+        const queryBuilder = this.userRepository.createQueryBuilder() 
+        await queryBuilder
+        .delete()
+        .where({})
+        .execute() 
+    }
 
-      const insertPromises = []
-        products.forEach(product => { // recorro los productos y los inserto en la base de datos con el método create
-            insertPromises.push(this.ProductsService.create(product))  // inserto el producto
+    private async insertUsers(){
+
+        const seedUsers = initialData.users 
+
+        const users: User[] = []
+
+        seedUsers.forEach(user => {
+            users.push(this.userRepository.create(user))
         })
 
-         await Promise.all(insertPromises) // espero a que todos los productos se hayan insertado
+      const dbUsers =   await this.userRepository.save(seedUsers)
+        return dbUsers[0]
+    }
+ 
+
+
+    private async insertNewProduct(user:User){ 
+       
+      await  this.ProductsService.deleteAllProducts()
+
+      const products = initialData.products 
+
+       const insertPromises = []
+        products.forEach(product => { 
+            insertPromises.push(this.ProductsService.create(product, user))  
+        })
+ 
+         await Promise.all(insertPromises) 
 
       return true
     }

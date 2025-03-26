@@ -21,11 +21,11 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const jwtSecret = configService.get('JWT_SECRET');
-        console.log('JWT Secret:', jwtSecret); // Depuración: Verifica el secreto JWT
+        console.log('JWT Secret:', jwtSecret); 
         return {
-          secret: jwtSecret, // Clave secreta para firmar los tokens JWT
+          secret: jwtSecret, 
           signOptions: {
-            expiresIn: '2h', // Tiempo de expiración del token (2 horas)
+            expiresIn: '2h', 
           },
         };
       },

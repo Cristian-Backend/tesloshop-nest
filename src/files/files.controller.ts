@@ -13,12 +13,12 @@ export class FilesController {
   ) {}
 
 
-  @Get('product/:imageName') // localhost:3000/files/product/imageName 
+  @Get('product/:imageName') 
   findProductImage(
-    @Res() res: Response, // se recibe la respuesta 
-    @Param('imageName') imageName: string){ // se recibe el nombre de la imagen
+    @Res() res: Response, 
+    @Param('imageName') imageName: string){ 
 
-    const path = this.filesService.getStaticProductImage(imageName) // se llama al metodo getStaticProductImage del servicio y se le pasa el nombre
+    const path = this.filesService.getStaticProductImage(imageName) 
 
     
     res.sendFile(path)
@@ -27,12 +27,12 @@ export class FilesController {
 
   // localhost:3000/files/product
   @Post('product')
-  @UseInterceptors(FileInterceptor("file",{ //intercepta la peticion 
-    fileFilter: fileFilter, // se le pasa el fileFilter de helpers
+  @UseInterceptors(FileInterceptor("file",{ 
+    fileFilter: fileFilter, 
 
     storage: diskStorage({ 
-        destination: "./static/products", // se guarda en la carpeta static/uploads
-        filename: fileNamer, // se le pasa el fileNamer de helpers
+        destination: "./static/products", 
+        filename: fileNamer, 
     })
 
   })) // 
@@ -43,7 +43,7 @@ export class FilesController {
       throw new BadRequestException("make sure that the file is an image ")
     }
 
-   // const secureUrl = `${file.filename}`
+  
    const secureUrl =  `${this.configService.get("HOST_API")}/files/product/${file.filename}`
 
 

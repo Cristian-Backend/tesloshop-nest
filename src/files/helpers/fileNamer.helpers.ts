@@ -5,9 +5,9 @@ export const fileNamer = (req: Express.Request, file: Express.Multer.File, callb
 
     //console.log({file});
     
-    if(!file) return callback(new Error (` file is empty`), false); // si no hay archivo retorna un error
+    if(!file) return callback(new Error (` file is empty`), false); 
 
-    const fileExptension = file.mimetype.split('/')[1]; // obtiene la extension del archivo
+    const fileExptension = file.mimetype.split('/')[1]; 
 
     const fileName = `${uuid()}.${fileExptension}`
 

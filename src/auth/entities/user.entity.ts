@@ -1,4 +1,5 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Product } from '../../products/entities/product.entity';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('users')
 export class User {
@@ -13,7 +14,7 @@ export class User {
     email: string;
 
    @Column('text',{
-        select: false // para que la contraseña no se muestre
+        select: false
    })
     password: string;
 
@@ -33,15 +34,21 @@ export class User {
     })
     roles: string[];
 
+    @OneToMany(
+        () => Product, 
+        (product) => product.user) 
+      
+        product:Product
+
     @BeforeInsert()
     checkFieldBeforeInsert(){
-        // para que cree el email en minusculas y sin espacios a los costados
+       
         this.email = this.email.toLocaleLowerCase().trim() 
     }
 
     @BeforeUpdate()
-    checkFieldBeforeUpdate(){ // para actualizar.
-        // para que actualice el email en minusculas y sin espacios a los costados
+    checkFieldBeforeUpdate(){ 
+       
         this.email = this.email.toLocaleLowerCase().trim() 
     }
 

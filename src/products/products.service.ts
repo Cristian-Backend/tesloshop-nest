@@ -7,6 +7,7 @@ import { DataSource, Repository } from 'typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { validate as isUUID } from 'uuid';
 import { ProductImage } from './entities';
+import { User } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class ProductsService {
@@ -26,14 +27,15 @@ export class ProductsService {
   ){}
     
     
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto, user: User) {
    try {
 
     const {images = [], ...productDetails } = createProductDto
     //1- creo el registro
     const product = this.productRepository.create({
       ...productDetails, 
-      images: images.map(image=> this.productImageRepository.create({url: image})) // explicacion:
+      images: images.map(image=> this.productImageRepository.create({url: image})),
+      user 
     })
     
     //2- guardo el registro en base de datos
@@ -97,7 +99,7 @@ export class ProductsService {
     }
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
+  async update(id: string, updateProductDto: UpdateProductDto, user:User ) {
 
     const {images, ...toUpdate} = updateProductDto;
 
@@ -106,36 +108,38 @@ export class ProductsService {
       ...toUpdate ,
     })
     
-    //si no existe el producto, preload devuelve null, por eso lo validamos
+    
     if (!product) throw new NotFoundException(`Product with id ${id} not found`);
 
     // Create queryRunner
-    const queryRunner = this.datasource.createQueryRunner() // creamos un queryRunner para manejar transacciones
-    await queryRunner.connect() //conectamos a la base de datos
-    await queryRunner.startTransaction() // iniciamos la transacción
+    const queryRunner = this.datasource.createQueryRunner() 
+    await queryRunner.connect() 
+    await queryRunner.startTransaction() 
     try {
 
-      if(images){ // si hay imagenes
-        await queryRunner.manager.delete(ProductImage, {product: {id}}) // borramos todas las imagenes del producto // id del producto.
-        // delete  * from producImage
+      if(images){ 
+        await queryRunner.manager.delete(ProductImage, {product: {id}}) 
+       
 
-        product.images = images.map(image => this.productImageRepository.create({url: image})) // creamos las nuevas imagenes
+        product.images = images.map(image => this.productImageRepository.create({url: image})) 
       } 
-      await queryRunner.manager.save(product) // guardamos el producto actualizado
 
-     //  await this.productRepository.save(product) // guardamos el producto actualizado
+      product.user = user 
+      await queryRunner.manager.save(product) 
 
-      await queryRunner.commitTransaction() // confirmamos la transacción
-      await queryRunner.release() // liberamos el queryRunner
+  
+
+      await queryRunner.commitTransaction() 
+      await queryRunner.release() 
 
       return this.findOnePlain(id)
 
 
 
     } catch (error) {
-      await queryRunner.rollbackTransaction() // deshacemos la transacción
-      await queryRunner.release() // liberamos el queryRunner
-      this.handleDBException(error) // lo creamos al final para que no se repita el codigo
+      await queryRunner.rollbackTransaction() 
+      await queryRunner.release() 
+      this.handleDBException(error) 
     }
 
  
@@ -144,8 +148,8 @@ export class ProductsService {
   }
 
  async remove(id: string) {
-    const product = await this.findOne(id) // buscamos el id
-    await this.productRepository.remove(product) // lo eliminamos
+    const product = await this.findOne(id) 
+    await this.productRepository.remove(product) 
 
   }
 
@@ -153,13 +157,13 @@ export class ProductsService {
 
 
 
-  private handleDBException(error: any){ // manejo de errores de duplicidad.
+  private handleDBException(error: any){ 
 
     // console.log(error)
-    if(error.code === '23505') // error de duplicado en postgres
+    if(error.code === '23505') 
       throw new BadRequestException(error.detail)
 
-    this.logger.error(error) // es un console.log pero de nestjs
+    this.logger.error(error) 
     throw new InternalServerErrorException('Unspected error, check logs')
 
   }
@@ -169,7 +173,7 @@ export class ProductsService {
     const query = this.productImageRepository.createQueryBuilder('product')
 
     try {
-      await query.delete().where({}).execute() // borramos todos los productos
+      await query.delete().where({}).execute() 
 
       
     } catch (error) {
